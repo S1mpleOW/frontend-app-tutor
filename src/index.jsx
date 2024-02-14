@@ -1,17 +1,10 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 
-import {
-	APP_INIT_ERROR,
-	APP_READY,
-	subscribe,
-	initialize,
-	APP_AUTH_INITIALIZED,
-} from '@edx/frontend-platform';
-import ReactDOM, { hydrate } from 'react-dom';
+import { APP_INIT_ERROR, APP_READY, subscribe, initialize } from '@edx/frontend-platform';
+import ReactDOM from 'react-dom';
 import { AppProvider, ErrorPage } from '@edx/frontend-platform/react';
 import messages from './i18n';
-import { Provider } from 'react-redux';
 import './index.scss';
 import App from './App';
 import { store } from './store';
@@ -30,6 +23,10 @@ subscribe(APP_INIT_ERROR, (error) => {
 });
 
 initialize({
+	// handlers: {
+	// 	config: () => {
+	// 		mergeConfig({}, 'frontendapptutorplugin');
+	// 	},
+	// },
 	messages,
-	hydrateAuthenticatedUser: true,
 });

@@ -31,7 +31,7 @@ export default function MainContent() {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
 			if (auth?.accessToken) {
 				const response = await api.get('/courses/v1/courses/');
-				console.log('🚀 ~ api:', api.getUri());
+				console.log('🚀 ~ response:', getAuthenticatedHttpClient().getUri());
 				const data = response.data;
 				console.log('🚀 ~ data:', data);
 				if (Array.isArray(data?.results)) {
