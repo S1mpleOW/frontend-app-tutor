@@ -29,11 +29,19 @@ export default function MainLayout() {
 					mainMenuDropdowns={[
 						{
 							id: '1',
-							buttonTitle: 'Courses',
+							buttonTitle: 'Options',
 							items: [
 								{
-									href: '/courses',
+									href: '/',
 									title: 'Courses',
+								},
+								{
+									href: '/emails',
+									title: 'Show all emails',
+								},
+								{
+									href: '/send-email',
+									title: 'Send Email',
 								},
 							],
 						},

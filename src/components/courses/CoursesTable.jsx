@@ -1,8 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Popconfirm, Form, Space, Table, Button } from 'antd';
-import { EditableCell } from './table/EditableCell';
+import { Form, Space, Table, Button } from 'antd';
 import { useMounted } from '../../hooks/useMounted';
-import { getAllAccounts } from '../../api/table.api';
+// import { getAllAccounts } from '../../api/table.api';
 import { useSelector } from 'react-redux';
 import api from '../../api/resource.api';
 import {
@@ -10,13 +9,15 @@ import {
 	getAuthenticatedHttpClient,
 	getAuthenticatedUser,
 } from '@edx/frontend-platform/auth';
-
+import { logError, logInfo } from '@edx/frontend-platform/logging';
+import { EditableCell } from '../layout/table/EditableCell';
+import { getConfig } from '@edx/frontend-platform';
+import { useNavigate } from 'react-router-dom';
 const initialPagination = {
 	current: 1,
 	pageSize: 4,
 };
-
-export default function MainContent() {
+export default function CoursesTable() {
 	const [form] = Form.useForm();
 	const [tableData, setTableData] = useState({
 		data: [],
@@ -25,14 +26,13 @@ export default function MainContent() {
 	});
 	const { isMounted } = useMounted();
 	const auth = useSelector((state) => state.auth);
+	const navigate = useNavigate();
 	const fetch = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
 			if (auth?.accessToken) {
 				const response = await api.get('/courses/v1/courses/');
-				console.log('🚀 ~ response:', getAuthenticatedHttpClient().getUri());
 				const data = response.data;
-				console.log('🚀 ~ data:', data);
 				if (Array.isArray(data?.results)) {
 					if (isMounted.current) {
 						const results = data.results.map((item) => {
@@ -67,15 +67,7 @@ export default function MainContent() {
 
 	useEffect(() => {
 		(async () => {
-			const user1 = getAuthenticatedUser();
-			console.log('🚀 ~ useEffect ~ user1:', user1);
-			const user2 = await fetchAuthenticatedUser();
-			console.log('🚀 ~ useEffect ~ user2:', user2);
-			// const response = await getAuthenticatedHttpClient().get(
-			// 	`http://local.edly.io/api/courses/v1/courses`
-			// );
-			// console.log('🚀 ~ data2:', response);
-			// console.log(getAuthenticatedHttpClient());
+			console.log(getAuthenticatedHttpClient());
 		})();
 	}, []);
 
@@ -83,42 +75,8 @@ export default function MainContent() {
 		fetch(pagination);
 	};
 
-	// const isEditing = (record) => record.key === editingKey;
-
-	// const edit = (record) => {
-	// 	form.setFieldsValue({ name: '', age: '', address: '', ...record });
-	// 	setEditingKey(record.key);
-	// };
-
-	// const save = async (key) => {
-	// 	try {
-	// 		const row = await form.validateFields();
-
-	// 		const newData = [...tableData.data];
-	// 		const index = newData.findIndex((item) => key === item.key);
-	// 		if (index > -1) {
-	// 			const item = newData[index];
-	// 			newData.splice(index, 1, {
-	// 				...item,
-	// 				...row,
-	// 			});
-	// 		} else {
-	// 			newData.push(row);
-	// 		}
-	// 		setTableData({ ...tableData, data: newData });
-	// 		setEditingKey(0);
-	// 	} catch (errInfo) {
-	// 		console.log('Validate Failed:', errInfo);
-	// 	}
-	// };
-
-	// const handleDeleteRow = (rowId) => {
-	// 	setTableData({ ...tableData, data: tableData.data.filter((item) => item.key !== rowId) });
-	// };
 	const handleShowMember = async (courseId) => {
-		const response = await api.get(`/courses/v1/courses/${courseId}/`);
-		const data = response.data?.overview ?? null;
-		console.log('🚀 ~ handleShowMember ~ data:', data);
+		navigate(`/enrollments/${courseId}`);
 	};
 
 	const columns = [
@@ -176,22 +134,6 @@ export default function MainContent() {
 		},
 	];
 
-	const mergedColumns = columns.map((col) => {
-		if (!col.editable) {
-			return col;
-		}
-		return {
-			...col,
-			onCell: (record) => ({
-				record,
-				inputType: col.dataIndex === 'age' ? 'number' : 'text',
-				dataIndex: col.dataIndex,
-				title: col.title,
-				editing: isEditing(record),
-			}),
-		};
-	});
-
 	return (
 		<Form form={form} component={false}>
 			<Table
@@ -202,7 +144,7 @@ export default function MainContent() {
 				}}
 				bordered
 				dataSource={tableData.data}
-				columns={mergedColumns}
+				columns={columns}
 				rowClassName="editable-row"
 				pagination={{
 					...tableData.pagination,

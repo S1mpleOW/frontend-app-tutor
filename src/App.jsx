@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import AuthService from './api/auth.api';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { storeAccessToken, storeRefreshToken } from './store/slices/authSlice';
 import { Routes, Route } from 'react-router-dom';
 import Login from './pages/Login';
-import MainContent from './components/layout/MainContent';
 import SendEmailPage from './pages/SendEmailPage';
+import CoursesTable from './components/courses/CoursesTable';
+import ShowMemberPage from './pages/ShowMemberPage';
+import EmailsPage from './pages/EmailsPage';
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -21,10 +23,10 @@ const App = () => {
 	return (
 		<Routes>
 			<Route element={<MainLayout />}>
-				<Route path="/" element={<MainContent />}></Route>
-				<Route path="/send-email">
-					<Route path=":id" element={<SendEmailPage />} />
-				</Route>
+				<Route path="/" element={<CoursesTable />}></Route>
+				<Route path="/enrollments/:id" element={<ShowMemberPage />}></Route>
+				<Route path="/send-email" element={<SendEmailPage />}></Route>
+				<Route path="/emails" element={<EmailsPage />}></Route>
 			</Route>
 			<Route path="login" element={<Login />}></Route>
 		</Routes>
