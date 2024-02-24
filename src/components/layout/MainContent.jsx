@@ -65,19 +65,19 @@ export default function MainContent() {
 		fetch(initialPagination);
 	}, [fetch]);
 
-	useEffect(() => {
-		(async () => {
-			const user1 = getAuthenticatedUser();
-			console.log('🚀 ~ useEffect ~ user1:', user1);
-			const user2 = await fetchAuthenticatedUser();
-			console.log('🚀 ~ useEffect ~ user2:', user2);
-			// const response = await getAuthenticatedHttpClient().get(
-			// 	`http://local.edly.io/api/courses/v1/courses`
-			// );
-			// console.log('🚀 ~ data2:', response);
-			// console.log(getAuthenticatedHttpClient());
-		})();
-	}, []);
+	// useEffect(() => {
+	// 	(async () => {
+	// 		const user1 = getAuthenticatedUser();
+	// 		console.log('🚀 ~ useEffect ~ user1:', user1);
+	// 		const user2 = await fetchAuthenticatedUser();
+	// 		console.log('🚀 ~ useEffect ~ user2:', user2);
+	// 		// const response = await getAuthenticatedHttpClient().get(
+	// 		// 	`http://local.edly.io/api/courses/v1/courses`
+	// 		// );
+	// 		// console.log('🚀 ~ data2:', response);
+	// 		// console.log(getAuthenticatedHttpClient());
+	// 	})();
+	// }, []);
 
 	const handleTableChange = (pagination) => {
 		fetch(pagination);

@@ -8,11 +8,6 @@ import Footer from '@edx/frontend-component-footer';
 import { Outlet } from 'react-router-dom';
 import messages from '../../i18n/index';
 import { useSelector } from 'react-redux';
-import {
-	fetchAuthenticatedUser,
-	getAuthenticatedHttpClient,
-	getAuthenticatedUser,
-} from '@edx/frontend-platform/auth';
 
 export default function MainLayout() {
 	const {

@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { notification, Space, Table, Button, Modal } from 'antd';
+import { notification, Space, Table, Button, Modal, Flex } from 'antd';
 import { useMounted } from '../hooks/useMounted';
 import api from '../api/resource.api';
 import { useParams, useNavigate } from 'react-router-dom';
@@ -48,7 +48,7 @@ export default function ShowMemberPage() {
 						const responseUrlDetail = await api.get(urlGetDetails);
 						const dataUrlDetail = responseUrlDetail.data;
 						if (Array.isArray(dataUrlDetail)) {
-							const mappedData = dataUrlDetail.map((item) => {
+							let mappedData = dataUrlDetail.map((item) => {
 								return {
 									key: item.email,
 									name: item.name,
@@ -59,6 +59,7 @@ export default function ShowMemberPage() {
 									date_joined: item.date_joined,
 								};
 							});
+							mappedData = mappedData.sort((a, b) => b.is_active - a.is_active);
 							setTableData({
 								data: mappedData,
 								pagination: {
@@ -160,6 +161,9 @@ export default function ShowMemberPage() {
 			render: (value) => {
 				return new Date(value).toLocaleString();
 			},
+			sorter: (a, b) => {
+				return new Date(a.last_login).getTime() - new Date(b.last_login).getTime();
+			},
 		},
 		{
 			title: 'Date joined',
@@ -167,6 +171,9 @@ export default function ShowMemberPage() {
 			width: '15%',
 			render: (value) => {
 				return new Date(value).toLocaleString();
+			},
+			sorter: (a, b) => {
+				return new Date(a.date_joined).getTime() - new Date(b.date_joined).getTime();
 			},
 		},
 		{
@@ -176,6 +183,7 @@ export default function ShowMemberPage() {
 			render: function (value) {
 				return value ? 'Yes' : 'No';
 			},
+			sorter: (a, b) => a.is_active - b.is_active,
 		},
 	];
 	return (
@@ -192,9 +200,11 @@ export default function ShowMemberPage() {
 					display: 'flex',
 				}}
 			>
-				<Button type="primary" onClick={handleNavigateSendEmailPage}>
-					Send email
-				</Button>
+				<Flex>
+					<Button type="primary" onClick={handleNavigateSendEmailPage}>
+						Send email
+					</Button>
+				</Flex>
 			</Space>
 			<Table
 				rowSelection={{

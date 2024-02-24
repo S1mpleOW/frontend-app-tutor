@@ -29,6 +29,7 @@ export default function SendEmailPage() {
 			values.sendMonthly = true;
 		}
 		delete values.sendEmailOptions;
+
 		if (emailsSelected.length === 0) {
 			message.error('Please select at least one email to send', 2);
 		}
@@ -59,7 +60,7 @@ export default function SendEmailPage() {
 		}
 	};
 	const onChangeDateTime = (value) => {
-		form.setFieldValue('sendAt', value.toISOString());
+		form.setFieldValue('sendMonthlyAt', value?.toISOString() || '');
 	};
 	const renderSendEmailMonthly = () => {
 		if (sendEmailOptions === 'send-monthly' || sendEmailOptions === 'send-schedule') {
@@ -71,6 +72,16 @@ export default function SendEmailPage() {
 						{
 							required: true,
 							message: 'Please enter valid values',
+						},
+						{
+							type: 'object',
+							validator: (rule, value) => {
+								const date = new Date(value);
+								if (date.getTime() < new Date().getTime()) {
+									return Promise.reject('Please choose a future date');
+								}
+								return Promise.resolve();
+							},
 						},
 					]}
 				>

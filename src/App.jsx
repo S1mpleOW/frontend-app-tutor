@@ -9,6 +9,7 @@ import SendEmailPage from './pages/SendEmailPage';
 import CoursesTable from './components/courses/CoursesTable';
 import ShowMemberPage from './pages/ShowMemberPage';
 import EmailsPage from './pages/EmailsPage';
+import ShowEmailDetailPage from './pages/ShowEmailDetailPage';
 
 const App = () => {
 	const dispatch = useDispatch();
@@ -26,6 +27,7 @@ const App = () => {
 				<Route path="/" element={<CoursesTable />}></Route>
 				<Route path="/enrollments/:id" element={<ShowMemberPage />}></Route>
 				<Route path="/send-email" element={<SendEmailPage />}></Route>
+				<Route path="/emails/:id" element={<ShowEmailDetailPage />}></Route>
 				<Route path="/emails" element={<EmailsPage />}></Route>
 			</Route>
 			<Route path="login" element={<Login />}></Route>

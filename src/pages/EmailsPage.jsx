@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Space, Table, Button } from 'antd';
+import { Space, Table, Button, message, Popconfirm } from 'antd';
 import { BASE_URL_API_BE } from '../utils/constants';
 import { useMounted } from '../hooks/useMounted';
 import { useSelector } from 'react-redux';
@@ -16,7 +16,22 @@ export default function EmailsPage() {
 	});
 	const { isMounted } = useMounted();
 	const auth = useSelector((state) => state.auth);
-
+	const handleCancelSendEmailMonthly = async (emailId) => {
+		try {
+			const response = await fetch(
+				`${BASE_URL_API_BE}/learners/emails/${emailId}/cancel-send-email-monthly`,
+				{
+					method: 'PATCH',
+				}
+			);
+			if (response.status === 200) {
+				message.success('Cancel send monthly successfully');
+				fetchData(tableData.pagination);
+			}
+		} catch (err) {
+			message.error('Cancel send monthly failed, Please try again later!');
+		}
+	};
 	const columns = [
 		{
 			title: 'Subject',
@@ -31,7 +46,6 @@ export default function EmailsPage() {
 			sorter: (a, b) => {
 				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
 			},
-			defaultSortOrder: 'descend',
 		},
 		{
 			title: 'Recipients',
@@ -53,13 +67,30 @@ export default function EmailsPage() {
 						<Button type="primary" onClick={() => handleShowEmail(record.key)}>
 							View detail
 						</Button>
+
+						{record?.isSendMonthly ? (
+							<Popconfirm
+								title="Are you sure?"
+								description="This action will stop sending email monthly to all recipients. Are you sure to continue?"
+								onConfirm={() => handleCancelSendEmailMonthly(record.key)}
+								onCancel={() => {}}
+								okText="Yes"
+								cancelText="No"
+							>
+								<Button type="dashed" danger>
+									Cancel send monthly
+								</Button>
+							</Popconfirm>
+						) : null}
 					</Space>
 				);
 			},
 		},
 	];
 	const navigate = useNavigate();
-	const handleShowEmail = (emailId) => {};
+	const handleShowEmail = (emailId) => {
+		navigate(`/emails/${emailId}`);
+	};
 	const fetchData = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
