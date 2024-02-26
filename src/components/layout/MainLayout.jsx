@@ -1,20 +1,16 @@
-import React, { useEffect } from 'react';
-import Sidebar from './Sidebar';
-import { Layout, theme, Button } from 'antd';
+import React from 'react';
+import { Layout, theme } from 'antd';
 const { Content } = Layout;
 import { IntlProvider } from '@edx/frontend-platform/i18n';
 import { StudioHeader as Header } from '@edx/frontend-component-header';
 import Footer from '@edx/frontend-component-footer';
 import { Outlet } from 'react-router-dom';
 import messages from '../../i18n/index';
-import { useSelector } from 'react-redux';
 
 export default function MainLayout() {
 	const {
 		token: { colorBgContainer, borderRadiusLG },
 	} = theme.useToken();
-	const auth = useSelector((state) => state.auth);
-	console.log('🚀 ~ MainLayout ~ auth:', auth);
 
 	return (
 		<IntlProvider locale="en" messages={messages[3]['uk']}>
@@ -27,15 +23,15 @@ export default function MainLayout() {
 							buttonTitle: 'Options',
 							items: [
 								{
-									href: '/',
+									href: '/mfe_frontendapptutor/courses',
 									title: 'Courses',
 								},
 								{
-									href: '/emails',
+									href: '/mfe_frontendapptutor/emails',
 									title: 'Show all emails',
 								},
 								{
-									href: '/send-email',
+									href: '/mfe_frontendapptutor/send-email',
 									title: 'Send Email',
 								},
 							],
