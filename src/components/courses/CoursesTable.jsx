@@ -18,42 +18,39 @@ export default function CoursesTable() {
 		loading: false,
 	});
 	const { isMounted } = useMounted();
-	const auth = useSelector((state) => state.auth);
 	const navigate = useNavigate();
 	const fetch = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
-			if (auth?.accessToken) {
-				const response = await getAuthenticatedHttpClient().get(
-					`${getConfig().LMS_BASE_URL}/api/courses/v1/courses/`
-				);
-				const data = response.data;
-				if (Array.isArray(data?.results)) {
-					if (isMounted.current) {
-						const results = data.results.map((item) => {
-							return {
-								key: item.id,
-								name: item.name,
-								start_display: item.start_display,
-								image: item.media.banner_image.uri_absolute,
-								hidden: item.hidden,
-							};
-						});
-						setTableData({
-							data: results,
-							pagination: {
-								...pagination,
-								...data?.pagination,
-							},
-							loading: false,
-						});
-					}
+			const response = await getAuthenticatedHttpClient().get(
+				`${getConfig().LMS_BASE_URL}/api/courses/v1/courses/`
+			);
+			const data = response.data;
+			if (Array.isArray(data?.results)) {
+				if (isMounted.current) {
+					const results = data.results.map((item) => {
+						return {
+							key: item.id,
+							name: item.name,
+							start_display: item.start_display,
+							image: item.media.banner_image.uri_absolute,
+							hidden: item.hidden,
+						};
+					});
+					setTableData({
+						data: results,
+						pagination: {
+							...pagination,
+							...data?.pagination,
+						},
+						loading: false,
+					});
 				}
 			} else {
 				setTableData((tableData) => ({ ...tableData, loading: false }));
 			}
 		},
-		[isMounted, auth?.accessToken]
+		[isMounted]
 	);
 
 	useEffect(() => {

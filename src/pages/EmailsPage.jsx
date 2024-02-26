@@ -15,7 +15,6 @@ export default function EmailsPage() {
 		loading: false,
 	});
 	const { isMounted } = useMounted();
-	const auth = useSelector((state) => state.auth);
 	const handleCancelSendEmailMonthly = async (emailId) => {
 		try {
 			const response = await fetch(
@@ -94,37 +93,36 @@ export default function EmailsPage() {
 	const fetchData = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
-			if (auth?.accessToken) {
-				const response = await fetch(`${BASE_URL_API_BE}/learners/emails`);
-				if (response.status === 200) {
-					const data = await response.json();
-					if (Array.isArray(data)) {
-						const mappedData = data.map((item) => {
-							return {
-								key: item.id,
-								subject: item.subject,
-								createdAt: item.createdAt,
-								recipients: item.recipients,
-								body: item.body,
-								isSendMonthly: !!item.isSendMonthly,
-							};
+			const response = await fetch(`${BASE_URL_API_BE}/learners/emails`);
+			if (response.status === 200) {
+				const data = await response.json();
+				if (Array.isArray(data)) {
+					const mappedData = data.map((item) => {
+						return {
+							key: item.id,
+							subject: item.subject,
+							createdAt: item.createdAt,
+							recipients: item.recipients,
+							body: item.body,
+							isSendMonthly: !!item.isSendMonthly,
+						};
+					});
+					if (isMounted.current) {
+						setTableData({
+							data: mappedData,
+							pagination: {
+								...pagination,
+								...data?.pagination,
+							},
+							loading: false,
 						});
-						if (isMounted.current) {
-							setTableData({
-								data: mappedData,
-								pagination: {
-									...pagination,
-									...data?.pagination,
-								},
-								loading: false,
-							});
-						}
+					} else {
+						setTableData((tableData) => ({ ...tableData, loading: false }));
 					}
 				}
 			}
-			setTableData((tableData) => ({ ...tableData, loading: false }));
 		},
-		[isMounted, auth?.accessToken]
+		[isMounted]
 	);
 	const handleTableChange = (pagination) => {
 		fetchData(pagination);

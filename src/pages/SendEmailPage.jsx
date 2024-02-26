@@ -16,6 +16,7 @@ import TextEditor from '../components/text-editor/TextEditor';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { BASE_URL_API_BE } from '../utils/constants';
+import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 const FormItem = Form.Item;
 
 export default function SendEmailPage() {
@@ -35,7 +36,12 @@ export default function SendEmailPage() {
 		}
 
 		const recipients = [...emailsSelected];
-		const sender = 'dungdqch@gmail.com';
+		const authenticatedUser = getAuthenticatedUser();
+		const sender = authenticatedUser?.email;
+		if (!sender) {
+			message.error('Please login to send email', 2);
+			return;
+		}
 		const data = {
 			...values,
 			sender,

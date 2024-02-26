@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { notification, Space, Table, Button, Modal, Flex } from 'antd';
 import { useMounted } from '../hooks/useMounted';
-import api from '../api/resource.api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
 import { storeEmails } from '../store/slices/emailsSlice';
@@ -21,62 +20,59 @@ export default function ShowMemberPage() {
 	});
 	const { isMounted } = useMounted();
 	const { id: courseId } = useParams();
-	const auth = useSelector((state) => state.auth);
 	const [apiNotification, contextHolderNotification] = notification.useNotification();
 	const [modal, contextHolderModal] = Modal.useModal();
 	const dispatch = useDispatch();
 	const fetch = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
-			if (auth?.accessToken) {
-				const urlGetEnrollment = new URL(
-					`${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollments?course_id=${encodeURIComponent(
-						courseId
-					)}`
-				);
+			const urlGetEnrollment = new URL(
+				`${getConfig().LMS_BASE_URL}/api/enrollment/v1/enrollments?course_id=${encodeURIComponent(
+					courseId
+				)}`
+			);
 
-				const response = await getAuthenticatedHttpClient().get(urlGetEnrollment);
-				const data = response.data;
-				if (Array.isArray(data?.results)) {
-					if (isMounted.current) {
-						const enrollments = data.results.map((item) => {
-							return item.user;
+			const response = await getAuthenticatedHttpClient().get(urlGetEnrollment);
+			const data = response.data;
+			if (Array.isArray(data?.results)) {
+				if (isMounted.current) {
+					const enrollments = data.results.map((item) => {
+						return item.user;
+					});
+
+					const urlGetDetails = new URL(
+						`${getConfig().LMS_BASE_URL}/api/user/v1/accounts?username=${enrollments.join(',')}`
+					);
+					const responseUrlDetail = await getAuthenticatedHttpClient().get(urlGetDetails);
+					const dataUrlDetail = responseUrlDetail.data;
+					if (Array.isArray(dataUrlDetail)) {
+						let mappedData = dataUrlDetail.map((item) => {
+							return {
+								key: item.email,
+								name: item.name,
+								email: item.email,
+								profile_image: item.profile_image.image_url_small,
+								is_active: item.is_active,
+								last_login: item.last_login,
+								date_joined: item.date_joined,
+							};
 						});
-
-						const urlGetDetails = new URL(
-							`${getConfig().LMS_BASE_URL}/api/user/v1/accounts?username=${enrollments.join(',')}`
-						);
-						const responseUrlDetail = await getAuthenticatedHttpClient().get(urlGetDetails);
-						const dataUrlDetail = responseUrlDetail.data;
-						if (Array.isArray(dataUrlDetail)) {
-							let mappedData = dataUrlDetail.map((item) => {
-								return {
-									key: item.email,
-									name: item.name,
-									email: item.email,
-									profile_image: item.profile_image.image_url_small,
-									is_active: item.is_active,
-									last_login: item.last_login,
-									date_joined: item.date_joined,
-								};
-							});
-							mappedData = mappedData.sort((a, b) => b.is_active - a.is_active);
-							setTableData({
-								data: mappedData,
-								pagination: {
-									...pagination,
-									...data?.pagination,
-								},
-								loading: false,
-							});
-						}
+						mappedData = mappedData.sort((a, b) => b.is_active - a.is_active);
+						setTableData({
+							data: mappedData,
+							pagination: {
+								...pagination,
+								...data?.pagination,
+							},
+							loading: false,
+						});
 					}
 				}
 			} else {
 				setTableData((tableData) => ({ ...tableData, loading: false }));
 			}
 		},
-		[isMounted, auth?.accessToken]
+		[isMounted]
 	);
 	const navigate = useNavigate();
 	const rowSelection = {

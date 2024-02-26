@@ -28,93 +28,45 @@ export default function MainContent() {
 	const fetch = useCallback(
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
-			if (auth?.accessToken) {
-				const response = await api.get('/courses/v1/courses/');
-				console.log('🚀 ~ response:', getAuthenticatedHttpClient().getUri());
-				const data = response.data;
-				console.log('🚀 ~ data:', data);
-				if (Array.isArray(data?.results)) {
-					if (isMounted.current) {
-						const results = data.results.map((item) => {
-							return {
-								key: item.id,
-								name: item.name,
-								start_display: item.start_display,
-								image: item.media.banner_image.uri_absolute,
-								hidden: item.hidden,
-							};
-						});
-						setTableData({
-							data: results,
-							pagination: {
-								...pagination,
-								...data?.pagination,
-							},
-							loading: false,
-						});
-					}
+			const response = await api.get('/courses/v1/courses/');
+			console.log('🚀 ~ response:', getAuthenticatedHttpClient().getUri());
+			const data = response.data;
+			console.log('🚀 ~ data:', data);
+			if (Array.isArray(data?.results)) {
+				if (isMounted.current) {
+					const results = data.results.map((item) => {
+						return {
+							key: item.id,
+							name: item.name,
+							start_display: item.start_display,
+							image: item.media.banner_image.uri_absolute,
+							hidden: item.hidden,
+						};
+					});
+					setTableData({
+						data: results,
+						pagination: {
+							...pagination,
+							...data?.pagination,
+						},
+						loading: false,
+					});
 				}
 			} else {
 				setTableData((tableData) => ({ ...tableData, loading: false }));
 			}
 		},
-		[isMounted, auth?.accessToken]
+		[isMounted]
 	);
 
 	useEffect(() => {
 		fetch(initialPagination);
 	}, [fetch]);
 
-	// useEffect(() => {
-	// 	(async () => {
-	// 		const user1 = getAuthenticatedUser();
-	// 		console.log('🚀 ~ useEffect ~ user1:', user1);
-	// 		const user2 = await fetchAuthenticatedUser();
-	// 		console.log('🚀 ~ useEffect ~ user2:', user2);
-	// 		// const response = await getAuthenticatedHttpClient().get(
-	// 		// 	`http://local.edly.io/api/courses/v1/courses`
-	// 		// );
-	// 		// console.log('🚀 ~ data2:', response);
-	// 		// console.log(getAuthenticatedHttpClient());
-	// 	})();
-	// }, []);
-
 	const handleTableChange = (pagination) => {
 		fetch(pagination);
 	};
 
-	// const isEditing = (record) => record.key === editingKey;
-
-	// const edit = (record) => {
-	// 	form.setFieldsValue({ name: '', age: '', address: '', ...record });
-	// 	setEditingKey(record.key);
-	// };
-
-	// const save = async (key) => {
-	// 	try {
-	// 		const row = await form.validateFields();
-
-	// 		const newData = [...tableData.data];
-	// 		const index = newData.findIndex((item) => key === item.key);
-	// 		if (index > -1) {
-	// 			const item = newData[index];
-	// 			newData.splice(index, 1, {
-	// 				...item,
-	// 				...row,
-	// 			});
-	// 		} else {
-	// 			newData.push(row);
-	// 		}
-	// 		setTableData({ ...tableData, data: newData });
-	// 		setEditingKey(0);
-	// 	} catch (errInfo) {
-	// 		console.log('Validate Failed:', errInfo);
-	// 	}
-	// };
-
-	// const handleDeleteRow = (rowId) => {
-	// 	setTableData({ ...tableData, data: tableData.data.filter((item) => item.key !== rowId) });
-	// };
 	const handleShowMember = async (courseId) => {
 		const response = await api.get(`/courses/v1/courses/${courseId}/`);
 		const data = response.data?.overview ?? null;
