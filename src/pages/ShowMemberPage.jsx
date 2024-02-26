@@ -6,6 +6,7 @@ import api from '../api/resource.api';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
 import { storeEmails } from '../store/slices/emailsSlice';
+import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 const initialPagination = {
 	current: 1,
 	pageSize: 5,
@@ -34,7 +35,7 @@ export default function ShowMemberPage() {
 					)}`
 				);
 
-				const response = await api.get(urlGetEnrollment);
+				const response = await getAuthenticatedHttpClient().get(urlGetEnrollment);
 				const data = response.data;
 				if (Array.isArray(data?.results)) {
 					if (isMounted.current) {
@@ -45,7 +46,7 @@ export default function ShowMemberPage() {
 						const urlGetDetails = new URL(
 							`${getConfig().LMS_BASE_URL}/api/user/v1/accounts?username=${enrollments.join(',')}`
 						);
-						const responseUrlDetail = await api.get(urlGetDetails);
+						const responseUrlDetail = await getAuthenticatedHttpClient().get(urlGetDetails);
 						const dataUrlDetail = responseUrlDetail.data;
 						if (Array.isArray(dataUrlDetail)) {
 							let mappedData = dataUrlDetail.map((item) => {

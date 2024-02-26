@@ -2,10 +2,10 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Form, Space, Table, Button } from 'antd';
 import { useMounted } from '../../hooks/useMounted';
 import { useSelector } from 'react-redux';
-import api from '../../api/resource.api';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
 import { EditableCell } from '../layout/table/EditableCell';
 import { useNavigate } from 'react-router-dom';
+import { getConfig } from '@edx/frontend-platform';
 const initialPagination = {
 	current: 1,
 	pageSize: 4,
@@ -24,8 +24,9 @@ export default function CoursesTable() {
 		async (pagination) => {
 			setTableData((tableData) => ({ ...tableData, loading: true }));
 			if (auth?.accessToken) {
-				const response = await getAuthenticatedHttpClient().get('/courses/v1/courses/');
-				console.log('🚀 ~ response:', response);
+				const response = await getAuthenticatedHttpClient().get(
+					`${getConfig().LMS_BASE_URL}/api/courses/v1/courses/`
+				);
 				const data = response.data;
 				if (Array.isArray(data?.results)) {
 					if (isMounted.current) {
