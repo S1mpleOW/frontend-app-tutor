@@ -57,6 +57,11 @@ export default function SendEmailPage() {
 			});
 			if (response.status === 200) {
 				message.success('Email sent successfully', 2);
+				form.resetFields({
+					sendEmailOptions: 'none',
+					subject: '',
+					body: '',
+				});
 				return;
 			} else {
 				message.error('Error when sending email, please try again!', 2);

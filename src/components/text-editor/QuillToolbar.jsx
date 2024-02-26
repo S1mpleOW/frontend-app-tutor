@@ -69,7 +69,6 @@ export const modules = {
 				})
 					.then((response) => response.json())
 					.then((result) => {
-						console.log(result);
 						message.success('Upload image successfully', 2);
 						resolve(result.file.path);
 					})

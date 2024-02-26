@@ -57,12 +57,6 @@ export default function CoursesTable() {
 		fetch(initialPagination);
 	}, [fetch]);
 
-	useEffect(() => {
-		(async () => {
-			console.log(getAuthenticatedHttpClient());
-		})();
-	}, []);
-
 	const handleTableChange = (pagination) => {
 		fetch(pagination);
 	};
