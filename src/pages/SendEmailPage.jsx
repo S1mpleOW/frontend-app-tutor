@@ -11,28 +11,32 @@ import {
 	Space,
 	Popover,
 	message,
+	Modal,
 } from 'antd';
 import TextEditor from '../components/text-editor/TextEditor';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { BASE_URL_API_BE } from '../utils/constants';
+import { BASE_URL_API_BE, EMAIL_OPTIONS } from '../utils/constants';
 import { getAuthenticatedUser } from '@edx/frontend-platform/auth';
 const FormItem = Form.Item;
 
 export default function SendEmailPage() {
 	const [form] = Form.useForm();
 	const emailsSelected = useSelector((state) => state.emails.value) || [];
-	const sendEmailOptions = Form.useWatch('sendEmailOptions', form);
+	const sendEmailOption = Form.useWatch('sendEmailOption', form);
 	const navigate = useNavigate();
+	const [modal, contextHolderModal] = Modal.useModal();
+	const handleResetAllFields = () => {
+		form.setFieldsValue({
+			subject: '',
+			body: '',
+			sendEmailOption: EMAIL_OPTIONS.NONE,
+			sendAt: '',
+		});
+	};
 	const handleFormSubmit = async (values) => {
-		values.sendMonthly = false;
-		if (values.sendEmailOptions === 'send-monthly') {
-			values.sendMonthly = true;
-		}
-		delete values.sendEmailOptions;
-
-		if (emailsSelected.length === 0) {
-			message.error('Please select at least one email to send', 2);
+		if (values.sendEmailOption === EMAIL_OPTIONS.NONE) {
+			values.sendAt = new Date().toISOString();
 		}
 
 		const recipients = [...emailsSelected];
@@ -40,6 +44,11 @@ export default function SendEmailPage() {
 		const sender = authenticatedUser?.email;
 		if (!sender) {
 			message.error('Please login to send email', 2);
+			return;
+		}
+		const content = values.body;
+		if (content.includes('script')) {
+			message.error('Content must not contain script tag', 2);
 			return;
 		}
 		const data = {
@@ -55,30 +64,44 @@ export default function SendEmailPage() {
 				},
 				body: JSON.stringify(data),
 			});
-			if (response.status === 200) {
+			const dataResponse = await response.json();
+			if (response.status === 200 && dataResponse?.id) {
 				message.success('Email sent successfully', 2);
-				form.resetFields({
-					sendEmailOptions: 'none',
-					subject: '',
-					body: '',
-				});
+				handleResetAllFields();
 				return;
 			} else {
 				message.error('Error when sending email, please try again!', 2);
 			}
 		} catch (e) {
+			console.log(e);
 			message.error('Error when sending email, please try again!', 2);
 		}
 	};
-	const onChangeDateTime = (value) => {
-		form.setFieldValue('sendMonthlyAt', value?.toISOString() || '');
+
+	const handleModalConfirmSendEmail = (values) => {
+		if (emailsSelected.length === 0) {
+			message.error('Please select at least one email to send', 2);
+			return;
+		}
+		modal.confirm({
+			title: 'Send Email',
+			content: `Are you sure you want to send email to ${emailsSelected.join(', ')}?`,
+			onOk() {
+				handleFormSubmit(values);
+			},
+		});
 	};
+
+	const onChangeDateTime = (value) => {
+		form.setFieldValue('sendAt', value?.toISOString() || '');
+	};
+
 	const renderSendEmailMonthly = () => {
-		if (sendEmailOptions === 'send-monthly' || sendEmailOptions === 'send-schedule') {
+		if (sendEmailOption === EMAIL_OPTIONS.MONTHLY || sendEmailOption === EMAIL_OPTIONS.SCHEDULED) {
 			return (
 				<FormItem
 					label="Choose time to send email"
-					name="sendMonthlyAt"
+					name="sendAt"
 					rules={[
 						{
 							required: true,
@@ -109,6 +132,7 @@ export default function SendEmailPage() {
 		}
 		return null;
 	};
+
 	const contentShowEmails = () => {
 		return (
 			<Flex vertical gap={8}>
@@ -166,9 +190,9 @@ export default function SendEmailPage() {
 					form={form}
 					layout="vertical"
 					autoComplete="off"
-					onFinish={handleFormSubmit}
+					onFinish={handleModalConfirmSendEmail}
 					initialValues={{
-						sendEmailOptions: 'none',
+						sendEmailOption: EMAIL_OPTIONS.NONE,
 					}}
 				>
 					<FormItem
@@ -202,12 +226,12 @@ export default function SendEmailPage() {
 					<Space align="center" size={24}>
 						<FormItem
 							label="Do you want to schedule to send email or send email monthly?"
-							name="sendEmailOptions"
+							name="sendEmailOption"
 						>
 							<Radio.Group>
-								<Radio value={'send-monthly'}>Send email monthly</Radio>
-								<Radio value={'send-schedule'}>Delay sending email </Radio>
-								<Radio value={'none'}>None</Radio>
+								<Radio value={EMAIL_OPTIONS.MONTHLY}>Send email monthly</Radio>
+								<Radio value={EMAIL_OPTIONS.SCHEDULED}>Delay sending email</Radio>
+								<Radio value={EMAIL_OPTIONS.NONE}>None</Radio>
 							</Radio.Group>
 						</FormItem>
 						{renderSendEmailMonthly()}
@@ -230,6 +254,7 @@ export default function SendEmailPage() {
 					</FormItem>
 				</Form>
 			</div>
+			{contextHolderModal}
 		</div>
 	);
 }

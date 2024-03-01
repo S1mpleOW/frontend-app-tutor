@@ -6,6 +6,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
 import { storeEmails } from '../store/slices/emailsSlice';
 import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
+import api from '../api/resource.api';
+
 const initialPagination = {
 	current: 1,
 	pageSize: 5,
@@ -18,6 +20,7 @@ export default function ShowMemberPage() {
 		pagination: initialPagination,
 		loading: false,
 	});
+	const auth = useSelector((state) => state.auth);
 	const { isMounted } = useMounted();
 	const { id: courseId } = useParams();
 	const [apiNotification, contextHolderNotification] = notification.useNotification();
@@ -43,6 +46,7 @@ export default function ShowMemberPage() {
 					const urlGetDetails = new URL(
 						`${getConfig().LMS_BASE_URL}/api/user/v1/accounts?username=${enrollments.join(',')}`
 					);
+					// const responseUrlDetail = await getAuthenticatedHttpClient().get(urlGetDetails);
 					const responseUrlDetail = await getAuthenticatedHttpClient().get(urlGetDetails);
 					const dataUrlDetail = responseUrlDetail.data;
 					if (Array.isArray(dataUrlDetail)) {

@@ -13,4 +13,10 @@ export const FONTS = [
 	'sans-serif',
 ];
 
+export const EMAIL_OPTIONS = {
+	MONTHLY: 'MONTHLY',
+	SCHEDULED: 'SCHEDULED',
+	NONE: 'NONE',
+};
+
 export const API_STORE_IMAGE = `${BASE_URL_API_BE}/files/upload`;

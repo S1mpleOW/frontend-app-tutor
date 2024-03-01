@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import MainLayout from './components/layout/MainLayout';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
@@ -7,8 +7,22 @@ import CoursesTable from './components/courses/CoursesTable';
 import ShowMemberPage from './pages/ShowMemberPage';
 import EmailsPage from './pages/EmailsPage';
 import ShowEmailDetailPage from './pages/ShowEmailDetailPage';
+import { useDispatch } from 'react-redux';
+import { storeAccessToken, storeRefreshToken } from './store/slices/authSlice';
+import AuthService from './api/auth.api';
+import UpdateEmailPage from './pages/UpdateEmailPage';
 
 const App = () => {
+	// const dispatch = useDispatch();
+	// useEffect(() => {
+	// 	(async () => {
+	// 		const authService = new AuthService();
+	// 		const { access_token, refresh_token } = await authService.getTokens();
+	// 		dispatch(storeAccessToken(access_token));
+	// 		dispatch(storeRefreshToken(refresh_token));
+	// 	})();
+	// }, []);
+
 	return (
 		<Routes>
 			<Route path="/" element={<MainLayout />}>
@@ -16,6 +30,7 @@ const App = () => {
 				<Route path="courses" element={<CoursesTable />} />
 				<Route path="enrollments/:id" element={<ShowMemberPage />}></Route>
 				<Route path="send-email" element={<SendEmailPage />}></Route>
+				<Route path="emails/:emailId/edit" element={<UpdateEmailPage />}></Route>
 				<Route path="emails/:id" element={<ShowEmailDetailPage />}></Route>
 				<Route path="emails" element={<EmailsPage />}></Route>
 			</Route>

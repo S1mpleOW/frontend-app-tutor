@@ -1,9 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Space, Table, Button, message, Popconfirm } from 'antd';
-import { BASE_URL_API_BE } from '../utils/constants';
+import { Space, Table, Button, message, Popconfirm, Tag } from 'antd';
+import { BASE_URL_API_BE, EMAIL_OPTIONS } from '../utils/constants';
 import { useMounted } from '../hooks/useMounted';
-import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
+import { ClockCircleOutlined, CheckCircleOutlined } from '@ant-design/icons';
 const initialPagination = {
 	current: 1,
 	pageSize: 5,
@@ -15,6 +15,8 @@ export default function EmailsPage() {
 		loading: false,
 	});
 	const { isMounted } = useMounted();
+	const navigate = useNavigate();
+
 	const handleCancelSendEmailMonthly = async (emailId) => {
 		try {
 			const response = await fetch(
@@ -31,6 +33,26 @@ export default function EmailsPage() {
 			message.error('Cancel send monthly failed, Please try again later!');
 		}
 	};
+	const handleCancelSendEmailScheduled = async (emailId) => {
+		try {
+			const response = await fetch(
+				`${BASE_URL_API_BE}/learners/emails/${emailId}/cancel-send-email-scheduled`,
+				{
+					method: 'PATCH',
+				}
+			);
+			if (response.status === 200) {
+				message.success('Cancel send monthly successfully');
+				fetchData(tableData.pagination);
+			}
+		} catch (err) {
+			message.error('Cancel send monthly failed, Please try again later!');
+		}
+	};
+	const handleUpdateEmail = (emailId) => {
+		navigate(`/emails/${emailId}/edit`);
+	};
+
 	const columns = [
 		{
 			title: 'Subject',
@@ -38,12 +60,12 @@ export default function EmailsPage() {
 			key: 'subject',
 		},
 		{
-			title: 'Created At',
-			dataIndex: 'createdAt',
-			key: 'createdAt',
+			title: 'Send at',
+			dataIndex: 'sendAt',
+			key: 'sendAt',
 			render: (text) => <span>{new Date(text).toLocaleString()}</span>,
 			sorter: (a, b) => {
-				return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+				return new Date(a.sentAt).getTime() - new Date(b.sentAt).getTime();
 			},
 		},
 		{
@@ -53,40 +75,91 @@ export default function EmailsPage() {
 			render: (text, record) => <span>{record.recipients.join(', ')}</span>,
 		},
 		{
-			title: 'Send Monthly',
-			dataIndex: 'isSendMonthly',
-			key: 'isSendMonthly',
-			render: (text, record) => <span>{record.isSendMonthly ? 'Yes' : 'No'}</span>,
+			title: 'Type',
+			dataIndex: 'sendEmailOption',
+			key: 'sendEmailOption',
+			sorter: (a, b) => {
+				return a.sendEmailOption.localeCompare(b.sendEmailOption);
+			},
+			render: (text, record) => {
+				if (text === EMAIL_OPTIONS.MONTHLY) {
+					return (
+						<Tag color="blue-inverse" icon={<ClockCircleOutlined />}>
+							{text}
+						</Tag>
+					);
+				}
+				if (text === EMAIL_OPTIONS.SCHEDULED) {
+					return (
+						<Tag icon={<ClockCircleOutlined />} color="default">
+							{text}
+						</Tag>
+					);
+				}
+				return (
+					<Tag color="success" icon={<CheckCircleOutlined />}>
+						{text}
+					</Tag>
+				);
+			},
 		},
 		{
 			title: 'Actions',
 			render: (text, record) => {
+				const isSent = new Date(record.sendAt).getTime() < new Date().getTime();
+
 				return (
 					<Space>
 						<Button type="primary" onClick={() => handleShowEmail(record.key)}>
 							View detail
 						</Button>
 
-						{record?.isSendMonthly ? (
-							<Popconfirm
-								title="Are you sure?"
-								description="This action will stop sending email monthly to all recipients. Are you sure to continue?"
-								onConfirm={() => handleCancelSendEmailMonthly(record.key)}
-								onCancel={() => {}}
-								okText="Yes"
-								cancelText="No"
-							>
-								<Button type="dashed" danger>
-									Cancel send monthly
+						{record?.sendEmailOption === EMAIL_OPTIONS.MONTHLY ? (
+							<>
+								<Button type="primary" ghost onClick={() => handleUpdateEmail(record.key)}>
+									Edit
 								</Button>
-							</Popconfirm>
+
+								<Popconfirm
+									title="Are you sure?"
+									description="This action will stop sending email monthly to all recipients. Are you sure to continue?"
+									onConfirm={() => handleCancelSendEmailMonthly(record.key)}
+									onCancel={() => {}}
+									okText="Yes"
+									cancelText="No"
+								>
+									<Button type="dashed" danger>
+										Cancel send monthly
+									</Button>
+								</Popconfirm>
+							</>
+						) : null}
+
+						{!isSent && record?.sendEmailOption === EMAIL_OPTIONS.SCHEDULED ? (
+							<>
+								<Button type="primary" ghost onClick={() => handleUpdateEmail(record.key)}>
+									Edit
+								</Button>
+
+								<Popconfirm
+									title="Are you sure?"
+									description="This action will stop sending email which is scheduled to send to all recipients. Are you sure to continue?"
+									onConfirm={() => handleCancelSendEmailScheduled(record.key)}
+									onCancel={() => {}}
+									okText="Yes"
+									cancelText="No"
+								>
+									<Button type="dashed" danger>
+										Cancel email scheduled
+									</Button>
+								</Popconfirm>
+							</>
 						) : null}
 					</Space>
 				);
 			},
 		},
 	];
-	const navigate = useNavigate();
 	const handleShowEmail = (emailId) => {
 		navigate(`/emails/${emailId}`);
 	};
@@ -96,17 +169,24 @@ export default function EmailsPage() {
 			const response = await fetch(`${BASE_URL_API_BE}/learners/emails`);
 			if (response.status === 200) {
 				const data = await response.json();
+				console.log('🚀 ~ data:', data);
 				if (Array.isArray(data)) {
-					const mappedData = data.map((item) => {
+					let mappedData = data.map((item) => {
 						return {
 							key: item.id,
 							subject: item.subject,
 							createdAt: item.createdAt,
 							recipients: item.recipients,
 							body: item.body,
-							isSendMonthly: !!item.isSendMonthly,
+							sendEmailOption: EMAIL_OPTIONS[item.sendEmailOption] ?? EMAIL_OPTIONS.NONE,
+							sendAt: item.sendAt,
 						};
 					});
+
+					mappedData = mappedData.sort((a, b) => {
+						return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+					});
+
 					if (isMounted.current) {
 						setTableData({
 							data: mappedData,
