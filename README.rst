@@ -1,4 +1,4 @@
-frontend-template-application
+frontend-template-application for tutor
 #############################
 
 |license-badge| |status-badge| |ci-badge| |codecov-badge|
@@ -7,46 +7,22 @@ frontend-template-application
 Purpose
 *******
 
-This repository is a template for Open edX micro-frontend applications. It is
-flagged as a Template Repository, meaning it can be used as a basis for new
-GitHub repositories by clicking the green "Use this template" button above.
-The rest of this document describes how to work with your new micro-frontend
-**after you've created a new repository from the template.**
-
-Getting Started
-***************
-
-After copying the template repository, you'll want to do a find-and-replace to
-replace all instances of ``frontend-template-application`` with the name of
-your new repository.  Also edit index.html to replace "Application Template"
-with a friendly name for this application that users will see in their browser
-tab.
+A MFE application which is intended to be used by tutor.
 
 Prerequisites
 =============
 
-The `devstack`_ is currently recommended as a development environment for your
-new MFE.  If you start it with ``make dev.up.lms`` that should give you
-everything you need as a companion to this frontend.
-
-Note that it is also possible to use `Tutor`_ to develop an MFE.  You can refer
-to the `relevant tutor-mfe documentation`_ to get started using it.
-
-.. _Devstack: https://github.com/openedx/devstack
+This project requires the following tools to be installed:
 
 .. _Tutor: https://github.com/overhangio/tutor
 
-.. _relevant tutor-mfe documentation: https://github.com/overhangio/tutor-mfe#mfe-development
 
 Cloning and Startup
 ===================
 
-In the following steps, replace "[PLACEHOLDER]" with the name of the repo you
-created when copying this template above.
-
 1. Clone your new repo:
 
-  ``git clone https://github.com/openedx/frontend-app-[PLACEHOLDER].git``
+  ``git clone https://github.com/S1mpleOW/frontend-app-tutor.git``
 
 2. Use node v18.x.
 
@@ -57,7 +33,7 @@ created when copying this template above.
 
 3. Install npm dependencies:
 
-  ``cd frontend-app-[PLACEHOLDER] && npm install``
+  ``cd frontend-app-tutor && npm install``
 
 4. Update the application port to use for local development:
 
@@ -70,13 +46,6 @@ created when copying this template above.
 
 The dev server is running at `http://localhost:8080 <http://localhost:8080>`_
 or whatever port you setup.
-
-Making Your New Project's README File
-=====================================
-
-Move ``README-template-frontend-app.rst`` to your project's ``README.rst``
-file. Please fill out all the sections - this helps out all developers
-understand your MFE, how to install it, and how to use it.
 
 Developing
 **********
@@ -91,52 +60,6 @@ example, not just a theoretical one.
 
 This also means, of course, that any committed code should be tested and
 subject to both CI and branch protection rules.
-
-Project Structure
-=================
-
-The source for this project is organized into nested submodules according to
-the `Feature-based Application Organization ADR`_.
-
-.. _Feature-based Application Organization ADR: https://github.com/openedx/frontend-template-application/blob/master/docs/decisions/0002-feature-based-application-organization.rst
-
-Build Process Notes
-===================
-
-**Production Build**
-
-The production build is created with ``npm run build``.
-
-Internationalization
-====================
-
-Please see refer to the `frontend-platform i18n howto`_ for documentation on
-internationalization.
-
-.. _frontend-platform i18n howto: https://github.com/openedx/frontend-platform/blob/master/docs/how_tos/i18n.rst
-
-Getting Help
-************
-
-If you're having trouble, we have discussion forums at
-https://discuss.openedx.org where you can connect with others in the community.
-
-Our real-time conversations are on Slack. You can request a `Slack
-invitation`_, then join our `community Slack workspace`_.  Because this is a
-frontend repository, the best place to discuss it would be in the `#wg-frontend
-channel`_.
-
-For anything non-trivial, the best path is to open an issue in this repository
-with as many details about the issue you are facing as you can provide.
-
-https://github.com/openedx/frontend-template-application/issues
-
-For more information about these options, see the `Getting Help`_ page.
-
-.. _Slack invitation: https://openedx.org/slack
-.. _community Slack workspace: https://openedx.slack.com/
-.. _#wg-frontend channel: https://openedx.slack.com/archives/C04BM6YC7A6
-.. _Getting Help: https://openedx.org/getting-help
 
 License
 *******
