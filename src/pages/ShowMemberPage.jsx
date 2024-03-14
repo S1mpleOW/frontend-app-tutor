@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { notification, Space, Table, Button, Modal, Flex } from 'antd';
+import { notification, Space, Table, Button, Modal, Flex, Typography } from 'antd';
 import { useMounted } from '../hooks/useMounted';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
@@ -201,7 +201,8 @@ export default function ShowMemberPage() {
 					display: 'flex',
 				}}
 			>
-				<Flex>
+				<Flex gap={24} align="center">
+					<Typography.Text>Total members: {tableData?.data?.length}</Typography.Text>
 					<Button type="primary" onClick={handleNavigateSendEmailPage}>
 						Send email
 					</Button>
