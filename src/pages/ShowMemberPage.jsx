@@ -5,8 +5,7 @@ import { useMounted } from '../hooks/useMounted';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
 import { storeEmails } from '../store/slices/emailsSlice';
-import { getAuthenticatedHttpClient } from '@edx/frontend-platform/auth';
-import api from '../api/resource.api';
+import { getAuthenticatedHttpClient, getAuthenticatedUser } from '@edx/frontend-platform/auth';
 
 const initialPagination = {
 	current: 1,
@@ -20,9 +19,10 @@ export default function ShowMemberPage() {
 		pagination: initialPagination,
 		loading: false,
 	});
-	const auth = useSelector((state) => state.auth);
 	const { isMounted } = useMounted();
 	const { id: courseId } = useParams();
+	const authenticatedUser = getAuthenticatedUser();
+	const currentEmailLoggedIn = authenticatedUser?.email;
 	const [apiNotification, contextHolderNotification] = notification.useNotification();
 	const [modal, contextHolderModal] = Modal.useModal();
 	const dispatch = useDispatch();
@@ -107,20 +107,28 @@ export default function ShowMemberPage() {
 				description: 'You must select at least one email to send',
 				duration: 2,
 			});
-		} else {
-			modal.confirm({
-				title: 'Send Email',
-				content: `Are you sure you want to send email to ${selectedEmails.join(', ')}?`,
-				onOk() {
-					navigate('/send-email', {
-						state: { emails: selectedEmails },
-					});
-				},
-				onCancel() {
-					console.log('Cancel');
-				},
-			});
+			return;
 		}
+		if (selectedEmails.includes(currentEmailLoggedIn)) {
+			apiNotification.error({
+				message: 'You cannot send email to yourself',
+				description: 'You cannot send email to yourself',
+				duration: 2,
+			});
+			return;
+		}
+		modal.confirm({
+			title: 'Send Email',
+			content: `Are you sure you want to send email to ${selectedEmails.join(', ')}?`,
+			onOk() {
+				navigate('/send-email', {
+					state: { emails: selectedEmails },
+				});
+			},
+			onCancel() {
+				console.log('Cancel');
+			},
+		});
 	};
 
 	const columns = [
