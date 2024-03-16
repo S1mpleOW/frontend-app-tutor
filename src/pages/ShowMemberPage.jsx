@@ -197,12 +197,18 @@ export default function ShowMemberPage() {
 		>
 			<Space
 				style={{
-					justifyContent: 'flex-end',
+					justifyContent: 'space-between',
 					display: 'flex',
+					alignItems: 'center',
 				}}
 			>
+				<Flex>
+					{selectedEmails?.length > 0 && (
+						<Typography.Text>Selected emails: {selectedEmails?.length}</Typography.Text>
+					)}
+				</Flex>
 				<Flex gap={24} align="center">
-					<Typography.Text>Total members: {tableData?.data?.length}</Typography.Text>
+					<Typography.Text>Total members: {tableData?.data?.length ?? 0}</Typography.Text>
 					<Button type="primary" onClick={handleNavigateSendEmailPage}>
 						Send email
 					</Button>

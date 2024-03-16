@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Space, Table, Button, message, Popconfirm, Tag } from 'antd';
+import { Space, Table, Button, message, Popconfirm, Tag, Flex, Typography } from 'antd';
 import { BASE_URL_API_BE, EMAIL_OPTIONS } from '../utils/constants';
 import { useMounted } from '../hooks/useMounted';
 import { useNavigate } from 'react-router-dom';
@@ -211,17 +211,37 @@ export default function EmailsPage() {
 		fetchData(initialPagination);
 	}, [fetchData]);
 	return (
-		<Table
-			bordered
-			dataSource={tableData.data}
-			columns={columns}
-			rowClassName="editable-row"
-			pagination={{
-				...tableData.pagination,
+		<Space
+			direction="vertical"
+			size={12}
+			style={{
+				width: '100%',
 			}}
-			onChange={handleTableChange}
-			loading={tableData.loading}
-			scroll={{ x: 800 }}
-		/>
+		>
+			<Space
+				style={{
+					justifyContent: 'flex-start',
+					display: 'flex',
+					alignItems: 'center',
+				}}
+			>
+				<Flex gap={24} align="center">
+					<Typography.Text>Total emails: {tableData?.data?.length ?? 0}</Typography.Text>
+				</Flex>
+			</Space>
+
+			<Table
+				bordered
+				dataSource={tableData.data}
+				columns={columns}
+				rowClassName="editable-row"
+				pagination={{
+					...tableData.pagination,
+				}}
+				onChange={handleTableChange}
+				loading={tableData.loading}
+				scroll={{ x: 800 }}
+			/>
+		</Space>
 	);
 }
