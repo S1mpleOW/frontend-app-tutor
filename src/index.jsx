@@ -43,7 +43,7 @@ initialize({
 	handlers: {
 		config: () => {
 			mergeConfig({
-				BE_BASE_URL: process.env.BE_BASE_URL || 'http://localhost:3000/api/v1',
+				BE_BASE_URL: process.env.BE_BASE_URL || 'http://127.0.0.1:3000/api/v1',
 				BASE_NAME: process.env.BASE_NAME || '/mfe_frontendapptutor',
 			});
 		},
