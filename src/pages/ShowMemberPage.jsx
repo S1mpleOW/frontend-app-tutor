@@ -1,12 +1,13 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { notification, Space, Table, Button, Modal, Flex, Typography } from 'antd';
+import { SearchOutlined } from '@ant-design/icons';
+import { notification, Space, Table, Button, Modal, Flex, Typography, Input } from 'antd';
 import { useMounted } from '../hooks/useMounted';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getConfig } from '@edx/frontend-platform';
 import { storeEmails } from '../store/slices/emailsSlice';
 import { getAuthenticatedHttpClient, getAuthenticatedUser } from '@edx/frontend-platform/auth';
-
+import Highlighter from 'react-highlight-words';
 const initialPagination = {
 	current: 1,
 	pageSize: 5,
@@ -19,12 +20,26 @@ export default function ShowMemberPage() {
 		pagination: initialPagination,
 		loading: false,
 	});
+
 	const { isMounted } = useMounted();
 	const { id: courseId } = useParams();
 	const authenticatedUser = getAuthenticatedUser();
 	const currentEmailLoggedIn = authenticatedUser?.email;
 	const [apiNotification, contextHolderNotification] = notification.useNotification();
 	const [modal, contextHolderModal] = Modal.useModal();
+	const [searchText, setSearchText] = useState('');
+	const [searchedColumn, setSearchedColumn] = useState('');
+	const searchInput = useRef(null);
+	const handleSearch = (selectedKeys, confirm, dataIndex) => {
+		confirm();
+		setSearchText(selectedKeys[0]);
+		setSearchedColumn(dataIndex);
+	};
+	const handleReset = (clearFilters) => {
+		clearFilters();
+		setSearchText('');
+	};
+
 	const dispatch = useDispatch();
 	const fetch = useCallback(
 		async (pagination) => {
@@ -91,6 +106,101 @@ export default function ShowMemberPage() {
 		}),
 	};
 
+	const getColumnSearchProps = (dataIndex) => ({
+		filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }) => (
+			<div
+				style={{
+					padding: 8,
+				}}
+				onKeyDown={(e) => e.stopPropagation()}
+			>
+				<Input
+					ref={searchInput}
+					placeholder={`Search ${dataIndex}`}
+					value={selectedKeys[0]}
+					onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+					onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+					style={{
+						marginBottom: 8,
+						display: 'block',
+					}}
+				/>
+				<Space>
+					<Button
+						type="primary"
+						onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+						icon={<SearchOutlined />}
+						size="small"
+						style={{
+							width: 90,
+						}}
+					>
+						Search
+					</Button>
+					<Button
+						onClick={() => clearFilters && handleReset(clearFilters)}
+						size="small"
+						style={{
+							width: 90,
+						}}
+					>
+						Reset
+					</Button>
+					<Button
+						type="link"
+						size="small"
+						onClick={() => {
+							confirm({
+								closeDropdown: false,
+							});
+							setSearchText(selectedKeys[0]);
+							setSearchedColumn(dataIndex);
+						}}
+					>
+						Filter
+					</Button>
+					<Button
+						type="link"
+						size="small"
+						onClick={() => {
+							close();
+						}}
+					>
+						close
+					</Button>
+				</Space>
+			</div>
+		),
+		filterIcon: (filtered) => (
+			<SearchOutlined
+				style={{
+					color: filtered ? '#1677ff' : undefined,
+				}}
+			/>
+		),
+		onFilter: (value, record) =>
+			record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+		onFilterDropdownOpenChange: (visible) => {
+			if (visible) {
+				setTimeout(() => searchInput.current?.select(), 100);
+			}
+		},
+		render: (text) =>
+			searchedColumn === dataIndex ? (
+				<Highlighter
+					highlightStyle={{
+						backgroundColor: '#ffc069',
+						padding: 0,
+					}}
+					searchWords={[searchText]}
+					autoEscape
+					textToHighlight={text ? text.toString() : ''}
+				/>
+			) : (
+				text
+			),
+	});
+
 	useEffect(() => {
 		fetch(initialPagination);
 	}, [fetch]);
@@ -136,11 +246,13 @@ export default function ShowMemberPage() {
 			title: 'Name',
 			dataIndex: 'name',
 			width: '15%',
+			...getColumnSearchProps('name'),
 		},
 		{
 			title: 'Email',
 			dataIndex: 'email',
 			width: '15%',
+			...getColumnSearchProps('email'),
 		},
 		{
 			title: 'Profile image',
